@@ -116,34 +116,65 @@ def get_drink_list():
 drink_list = get_drink_list()
 
 def open_drink(surface, drink):
-	pop_up_x = screen.get_width()*0.05
-	pop_up_y = screen.get_height()*0.05
+	pop_up_x = surface.get_width()*0.05
+	pop_up_y = surface.get_height()*0.05
 	#Draw black box over screen
-	pygame.draw.rect(screen, BLACK,
+	pygame.draw.rect(surface, BLACK,
 		[pop_up_x,
 		pop_up_y,
 		pop_up_width,
 		pop_up_height])
 	#Draw white box to display info
-	pygame.draw.rect(screen, WHITE,
+	pygame.draw.rect(surface, WHITE,
 					[pop_up_x+margin,
 					pop_up_y+margin,
 					pop_up_width*0.7-margin,
 					pop_up_height*0.7-margin])
 	#Draw Pour button
-	pygame.draw.rect(screen, WHITE,
+	pygame.draw.rect(surface, WHITE,
 					[pop_up_x+margin+(pop_up_width*0.7),
 					pop_up_y+margin,
 					pop_up_width*0.3-(margin*2),
 					pop_up_height*0.6-margin])
-
+	#Draw Done button
+	pygame.draw.rect(surface, WHITE,
+					[pop_up_x+margin+(pop_up_width*0.7),
+					pop_up_y+margin+(pop_up_height*0.6),
+					pop_up_width*0.3-(margin*2),
+					pop_up_height*0.4-(margin*2)])
+	'''Draw size buttons'''
+	#Whichever size button is currently selected will have a different background
+	#Background color of 1.5 oz button
+	button_15_color = WHITE
+	#Background color of 3 oz button
+	button_30_color = CUST_COL
+	#Background color of 4.5 oz button
+	button_45_color = WHITE
+	#Draw 1.5 oz button
+	pygame.draw.rect(surface, button_15_color,
+					[pop_up_x+margin,
+					pop_up_y+margin+(pop_up_height*0.7),
+					pop_up_width*(0.7/3)-margin,
+					pop_up_height*0.3-(margin*2)])
+	#Draw 3.0 oz button
+	pygame.draw.rect(surface, button_30_color,
+						[pop_up_x+margin+(pop_up_width*(0.7/3)),
+						pop_up_y+margin+(pop_up_height*0.7),
+						pop_up_width*(0.7/3)-margin,
+						pop_up_height*0.3-(margin*2)])
+	#Draw 4.5 oz button (Use rest of width to the sise button for width on this button)
+	pygame.draw.rect(surface, button_45_color,
+					[pop_up_x+margin+(pop_up_width*(0.7/3*2)),
+					pop_up_y+margin+(pop_up_height*0.7),
+					(pop_up_width*(0.7)-margin)-(pop_up_width*(0.7/3*2)),
+					pop_up_height*0.3-(margin*2)])
 
 #Loop until the user clicks the close button.
 done = False
 #Which page of the drink menu the user is on
 drink_page = 0
 #Determines if a drink menu is open
-drink_menu_open = True
+drink_menu_open = False
 #Keeps track of currently open drink
 cur_drink = ""
 # -------- Main Program Loop -----------
@@ -190,6 +221,8 @@ while done == False:
 				#Gets which cell is clicked, margin counts as part of cell above it
 				drink_click = int((click_pos[1]-margin)/(cell_height+margin))
 				print(drink_list[drink_page][drink_click])
+				drink_menu_open = True
+				cur_drink = drink_list[drink_page][drink_click]
 			
 	# Set the screen background
 	screen.fill(BLACK)
