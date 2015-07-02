@@ -85,13 +85,47 @@ pop_up_width = int(screen.get_width()*0.9)
 pop_up_height = int(screen.get_height()*0.9)
 
 # Create a list with cocktail names
-drinks = ["Jack & Coke", "Rum and Coke", "Long Island Iced Tea", "Coke", "Woo-Woo", "SHOTS!!!!!", "Bloody Mary", "Mimosa", "Beer", "Don't Show"]
+'''Test drink list'''#drinks = ["Jack & Coke", "Rum and Coke", "Long Island Iced Tea", "Coke", "Woo-Woo", "SHOTS!!!!!", "Bloody Mary", "Mimosa", "Beer", "Don't Show"]
 ##drinks = ["Item 1", "Item Two", "Item-o three-o", "Item 4", "Items 5s", "Item 6", "Item 7"]
 font = pygame.font.Font(None, 50) #36 default
 
+#Function that opens a text file in the same directory as the .py file and reads in the data about drinks
+#Returns a dictionary where the drinks are the key and the recipe is the value
+def build_drink_dict():
+	drink_dict_temp = {}
+	with open("drink_recipes.txt") as recipes:
+		#Iterate though file line by line
+		for i in recipes.readlines():
+			split = i.split(",")
+			#print(split)
+			drink_name = split[0]
+			split = split[1:]
+			#List of tuples that are the [ingredient,percent]
+			drink_recipe = []
+			#Iterate through list of ingredients and create recipe list of tuples
+			for i in split:
+				#Ingredients will be in this order:
+				#(Percent of drink) (name of ingredient) Example:50 Rum,50 Coke
+				#Get percent of drink by splitting at spaces
+				percent_temp = i.split(" ")[0]
+				#Get length of percent identifier, add one for the space after the number
+				#This will be where the name of the ingredient starts
+				ingredient_temp = i[len(percent_temp):].replace("\n", "")
+				#Add tuple to recipe list
+				drink_recipe.append([ingredient_temp,percent_temp])
+			#Add entry to dictionary
+			drink_dict_temp[drink_name] = drink_recipe
+	return drink_dict_temp
+
+
 #Function to get eligible drinks to make, returns list of lists, where each sublist has cell_num number of items
-def get_drink_list():
-	'''Get eligible drinks into big list here, call drinks'''
+def get_drink_list(drink_dict):
+	drinks = []
+	for key in drink_dict:
+		drinks.append(key)
+	#Reverse list so that it is in original order
+	drinks = list(reversed(drinks))
+	#List of available drinks
 	drinks_avail = []
 	done = False
 	num_drinks_avail = len(drinks)
@@ -113,7 +147,10 @@ def get_drink_list():
 
 	return drinks_avail
 
-drink_list = get_drink_list()
+#Get dict of drinks
+drink_dict = build_drink_dict()
+#Get list of drinks from dict
+drink_list = get_drink_list(drink_dict)
 
 def open_drink(surface, drink):
 	pop_up_x = surface.get_width()*0.05
@@ -142,32 +179,54 @@ def open_drink(surface, drink):
 					pop_up_y+margin+(pop_up_height*0.6),
 					pop_up_width*0.3-(margin*2),
 					pop_up_height*0.4-(margin*2)])
+
 	'''Draw size buttons'''
 	#Whichever size button is currently selected will have a different background
+	#Color of the buttons for size selection
+	global size_buttons
+	size_buttons = [WHITE, CUST_COL, WHITE]
+	'''
 	#Background color of 1.5 oz button
 	button_15_color = WHITE
 	#Background color of 3 oz button
 	button_30_color = CUST_COL
 	#Background color of 4.5 oz button
 	button_45_color = WHITE
+	'''
 	#Draw 1.5 oz button
-	pygame.draw.rect(surface, button_15_color,
+	pygame.draw.rect(surface, size_buttons[0],
 					[pop_up_x+margin,
 					pop_up_y+margin+(pop_up_height*0.7),
 					pop_up_width*(0.7/3)-margin,
 					pop_up_height*0.3-(margin*2)])
 	#Draw 3.0 oz button
-	pygame.draw.rect(surface, button_30_color,
+	pygame.draw.rect(surface, size_buttons[1],
 						[pop_up_x+margin+(pop_up_width*(0.7/3)),
 						pop_up_y+margin+(pop_up_height*0.7),
 						pop_up_width*(0.7/3)-margin,
 						pop_up_height*0.3-(margin*2)])
 	#Draw 4.5 oz button (Use rest of width to the sise button for width on this button)
-	pygame.draw.rect(surface, button_45_color,
+	pygame.draw.rect(surface, size_buttons[2],
 					[pop_up_x+margin+(pop_up_width*(0.7/3*2)),
 					pop_up_y+margin+(pop_up_height*0.7),
 					(pop_up_width*(0.7)-margin)-(pop_up_width*(0.7/3*2)),
 					pop_up_height*0.3-(margin*2)])
+	'''Draw text'''
+	text = font.render(drink, True, BLACK)
+	#Length of text, height of text (in pixels)
+	text_size = font.size(drink)
+	#Center text horizontally
+	text_x = pop_up_x + margin + (pop_up_width*0.01)
+	#Center text vertically
+	#Calculate height of cells * row, account for margin, then center in cell. -2 to account for text starting after 2 pixels
+	##text_y = (cell_height*row) + (margin*(row+1)) + ((cell_height-text_size[1])/2) - 2
+	text_y = pop_up_y + margin + (pop_up_height*0.01)
+	#Coordinates are top left of text box, text is actually 2 pixels down and right from coordinates
+	#text, [dist from left edge, dist from top edge]
+	screen.blit(text, [text_x, text_y])
+
+#Handle clicks for drink pop up menu
+##def open_drink_click()
 
 #Loop until the user clicks the close button.
 done = False
@@ -305,7 +364,6 @@ while done == False:
 		text = font.render(drink_list[drink_page][iterat], True, BLACK)
 		#Length of text, height of text (in pixels)
 		text_size = font.size(drink_list[drink_page][iterat])
-		text_x = margin + 5
 		#Center text vertically
 		#Calculate height of cells * row, account for margin, then center in cell. -2 to account for text starting after 2 pixels
 		text_y = (cell_height*row) + (margin*(row+1)) + ((cell_height-text_size[1])/2) - 2
